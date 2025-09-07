@@ -1,16 +1,19 @@
-const mysql = require("mysql2");
+import mysql from "mysql2";
 
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT
+const connection = mysql.createConnection({
+  host: process.env.MYSQL_ADDON_HOST,
+  user: process.env.MYSQL_ADDON_USER,
+  password: process.env.MYSQL_ADDON_PASSWORD,
+  database: process.env.MYSQL_ADDON_DB,
+  port: process.env.MYSQL_ADDON_PORT
 });
 
-db.connect(err => {
-  if (err) console.error("❌ MySQL connection failed:", err);
-  else console.log("✅ MySQL connected successfully!");
+connection.connect(err => {
+  if (err) {
+    console.error("❌ MySQL Connection Error:", err);
+    return;
+  }
+  console.log("✅ Connected to Clever Cloud MySQL");
 });
 
-module.exports = db;
+export default connection;
