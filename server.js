@@ -51,7 +51,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-
+// Allow only your frontend domain
+app.use(cors({
+  origin: 'https://salon-booking-frontends.onrender.com',
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 app.use(session({
   secret: 'your_secret_key',
   resave: false,
@@ -956,6 +961,7 @@ app.get('/api/stats', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
 
 
 
