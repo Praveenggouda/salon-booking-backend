@@ -1,19 +1,24 @@
 import mysql from "mysql2";
 
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
   host: process.env.MYSQL_ADDON_HOST,
   user: process.env.MYSQL_ADDON_USER,
   password: process.env.MYSQL_ADDON_PASSWORD,
   database: process.env.MYSQL_ADDON_DB,
-  port: process.env.MYSQL_ADDON_PORT
+  port: process.env.MYSQL_ADDON_PORT,
+  ssl: {
+    rejectUnauthorized: false // important for Clever Cloud
+  }
 });
 
-connection.connect(err => {
+// Test connection
+pool.getConnection((err, connection) => {
   if (err) {
     console.error("❌ MySQL Connection Error:", err);
-    return;
+  } else {
+    console.log("✅ Connected to Clever Cloud MySQL");
+    connection.release();
   }
-  console.log("✅ Connected to Clever Cloud MySQL");
 });
 
-export default connection;
+export default pool;
