@@ -70,12 +70,14 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // MySQL connection
+// MySQL connection
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME
-});;// ✅ USER ROUTES
+  password: process.env.DB_PASSWORD, // Correct variable name
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT // Add port too
+});
 // --------------------------------------------
 // ✅ Register Route (with bcrypt)
 // Nodemailer setup
@@ -954,3 +956,4 @@ app.get('/api/stats', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
