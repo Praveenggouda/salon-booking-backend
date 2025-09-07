@@ -77,7 +77,7 @@ const db = mysql.createPool({
   password: process.env.MYSQL_ADDON_PASSWORD, // Clever Cloud password
   database: process.env.MYSQL_ADDON_DB,   // Clever Cloud DB name
   port: process.env.MYSQL_ADDON_PORT      // 3306
-});----------------------------------------
+});
 // ✅ Register Route (with bcrypt)
 // Nodemailer setup
 // ✅ Declare only once
@@ -955,5 +955,6 @@ app.get('/api/stats', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
 
 
