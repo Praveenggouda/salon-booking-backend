@@ -71,16 +71,8 @@ const upload = multer({ storage });
 
 // MySQL connection
 // MySQL connection
-const db = mysql.createPool({
-  host: process.env.MYSQL_ADDON_HOST,     // Clever Cloud host
-  user: process.env.MYSQL_ADDON_USER,     // Clever Cloud username
-  password: process.env.MYSQL_ADDON_PASSWORD, // Clever Cloud password
-  database: process.env.MYSQL_ADDON_DB,   // Clever Cloud DB name
-  port: process.env.MYSQL_ADDON_PORT      // 3306
-});
-// ✅ Register Route (with bcrypt)
-// Nodemailer setup
-// ✅ Declare only once
+import db from "./db.js";
+
 
 
 // ✅ 1. Register route - send OTP
@@ -955,6 +947,7 @@ app.get('/api/stats', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
 
 
 
