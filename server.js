@@ -44,6 +44,14 @@ app.use(express.urlencoded({ extended: true })); // ✅ Handle form data
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public'))); // put your html/js/css in 'public' folder
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+
 app.use(session({
   secret: 'your_secret_key',
   resave: false,
@@ -948,6 +956,7 @@ app.get('/api/stats', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
 
 
 
