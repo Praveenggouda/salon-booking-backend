@@ -80,8 +80,7 @@ const upload = multer({ storage });
 // MySQL connection
 // MySQL connection
 const db = require("./db.js");
-const app = express();
-const PORT = process.env.PORT || 3000;
+
 
 // Test MySQL connection
 (async () => {
@@ -969,6 +968,7 @@ app.get('/api/stats', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
 
 
 
