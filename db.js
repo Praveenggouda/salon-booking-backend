@@ -1,14 +1,29 @@
-import mysql from 'mysql2/promise';
+// db.js
+const mysql = require("mysql2/promise");
 
-const db = mysql.createPool({
-  host: process.env.MYSQL_ADDON_HOST,
-  user: process.env.MYSQL_ADDON_USER,
-  password: process.env.MYSQL_ADDON_PASSWORD,
-  database: process.env.MYSQL_ADDON_DB,
-  port: process.env.MYSQL_ADDON_PORT || 3306,
+// Create pool
+const pool = mysql.createPool({
+  host: "bcnineplj7dyjhrseuiu-mysql.services.clever-cloud.com",
+  user: "uq6vpcfofhquauek",
+  password: "okCTiQ7eN5BjKnz7cX96",
+  database: "bcnineplj7dyjhrseuiu",
+  port: 3306,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
 
-export default db;
+// Function to test connection
+async function testConnection() {
+  try {
+    const connection = await pool.getConnection();
+    console.log("✅ MySQL connected successfully!");
+    connection.release();
+  } catch (err) {
+    console.error("☒ Failed to connect to MySQL:", err.message);
+  }
+}
+
+testConnection();
+
+module.exports = pool;
