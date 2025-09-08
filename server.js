@@ -78,6 +78,9 @@ const upload = multer({ storage });
 const db = require("./db.js");
 
 
+app.get("/", (req, res) => {
+    res.send("Backend is running!");
+});
 
 //  1. Register route - send OTP
 app.post('/register', async (req, res) => {
@@ -951,4 +954,5 @@ app.get('/api/stats', (req, res) => {
 app.listen(PORT, () => {
   console.log(` Server running on http://localhost:${PORT}`);
 });
+
 
