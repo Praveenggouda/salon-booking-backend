@@ -49,12 +49,20 @@ app.use(cors({
   methods: ['GET', 'POST'],
   credentials: true
 }));
+app.set('trust proxy', 1); // Important for Render (HTTPS)
+
 app.use(session({
-  secret: 'your_secret_key',
+  secret: process.env.SESSION_SECRET,  // ✅ now safe
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: { 
+    secure: true,       // ✅ because Render uses HTTPS
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 // 1 hour
+  }
 }));
+
+
 
 // Create upload folder if not exists
 const uploadDir = './uploads';
@@ -264,12 +272,15 @@ app.post('/admin/login', async (req, res) => {
     }
 
     const admin = rows[0];
-
     const isMatch = await bcrypt.compare(password, admin.password);
 
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid password' });
     }
+
+    // ✅ Save admin session
+    req.session.adminId = admin.id;
+    req.session.adminName = admin.name;
 
     res.json({
       success: true,
@@ -281,6 +292,13 @@ app.post('/admin/login', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+app.get('/admin/check', (req, res) => {
+  if (req.session.adminId) {
+    res.json({ loggedIn: true, name: req.session.adminName });
+  } else {
+    res.json({ loggedIn: false });
   }
 });
 
@@ -954,5 +972,6 @@ app.get('/api/stats', (req, res) => {
 app.listen(PORT, () => {
   console.log(` Server running on http://localhost:${PORT}`);
 });
+
 
 
