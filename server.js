@@ -36,16 +36,6 @@ const transporter = nodemailer.createTransport({
 const otpMap = new Map();
 
 // Middleware setup
-app.use(cors());
-app.use(express.json()); //  Handle JSON
-app.use(express.urlencoded({ extended: true })); // Handle form data
-
-// Serve public files
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// Allow only your frontend domain
-const cors = require("cors");
-
 app.use(cors({
   origin: [
     "https://salon-booking-frontends.onrender.com",
@@ -54,6 +44,14 @@ app.use(cors({
   ],
   credentials: true
 }));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 app.set('trust proxy', 1); // Important for Render (HTTPS)
 
 app.use(session({
