@@ -44,9 +44,14 @@ app.use(express.urlencoded({ extended: true })); // Handle form data
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Allow only your frontend domain
+const cors = require("cors");
+
 app.use(cors({
-  origin: 'https://salon-booking-frontends.onrender.com',
-  methods: ['GET', 'POST'],
+  origin: [
+    "https://salon-booking-frontends.onrender.com",
+    "https://glowbook.website",
+    "https://www.glowbook.website"
+  ],
   credentials: true
 }));
 app.set('trust proxy', 1); // Important for Render (HTTPS)
