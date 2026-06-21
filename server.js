@@ -98,25 +98,36 @@ app.post('/register', async (req, res) => {
   const { name, email, password, phone, gender } = req.body;
 
   try {
-    // Check if already registered
-    const [rows] = await db.query("SELECT * FROM users WHERE email = ? OR phone = ?", [email, phone]);
+    const [rows] = await db.query(
+      "SELECT * FROM users WHERE email = ? OR phone = ?",
+      [email, phone]
+    );
+
     if (rows.length > 0) {
       return res.json({ success: false, message: "Email or phone already registered" });
     }
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000);
-    otpMap.set(email, { otp, data: { name, email, password, phone, gender }, expires: Date.now() + 5 * 60000 }); // 5 minutes
 
-    // Send email
-    await transporter.sendMail({
+    otpMap.set(email, {
+      otp,
+      data: { name, email, password, phone, gender },
+      expires: Date.now() + 5 * 60000
+    });
+
+    // respond FIRST
+    res.json({ success: true, message: "OTP sent to email" });
+
+    // send email AFTER response (non-blocking)
+    transporter.sendMail({
       from: 'praveengouda31@gmail.com',
       to: email,
       subject: 'Your OTP for Salon Registration',
-      html: `<h3>Your OTP is: <span>${otp}</span></h3>`
-    });
+      html: `<h3>Your OTP is: <b>${otp}</b></h3>`
+    })
+    .then(() => console.log("OTP sent"))
+    .catch(err => console.log("Email error:", err));
 
-    res.json({ success: true, message: "OTP sent to email" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
