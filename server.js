@@ -89,7 +89,7 @@ app.get("/", (req, res) => {
     res.send("Backend is running!");
 });
 
-//  1. Register route - send OTP
+// 1. Register route - send OTP
 app.post('/register', async (req, res) => {
   const { name, email, password, phone, gender } = req.body;
 
@@ -111,27 +111,43 @@ app.post('/register', async (req, res) => {
       expires: Date.now() + 5 * 60000
     });
 
-    // respond FIRST
-    res.json({ success: true, message: "OTP sent to email" });
+    // ⚠️ Send email FIRST and wait for it
+    try {
+      const info = await transporter.sendMail({
+        from: process.env.GMAIL_USER,
+        to: email,
+        subject: 'Your OTP for GlowBook Registration',
+        html: `
+          <h2>Welcome to GlowBook! ✨</h2>
+          <p>Your OTP for registration is:</p>
+          <h1 style="color: #6C63FF; font-size: 32px;">${otp}</h1>
+          <p>This OTP is valid for <b>5 minutes</b>.</p>
+          <p>If you didn't request this, please ignore this email.</p>
+        `
+      });
+      
+      console.log("✅ Email sent:", info.response);
+      
+      // ✅ Now send success response
+      res.json({ success: true, message: "OTP sent to your email" });
+      
+    } catch (emailError) {
+      console.error("❌ Email failed:", emailError);
+      // ❌ Clean up the OTP since email failed
+      otpMap.delete(email);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to send OTP. Please check your email configuration." 
+      });
+    }
 
-    // send email AFTER response (non-blocking)
-transporter.sendMail({
-  from: process.env.GMAIL_USER,
-  to: email,
-  subject: 'Your OTP for Salon Registration',
-  html: `<h3>Your OTP is: <b>${otp}</b></h3>`
-})
-.then(info => {
-  console.log("EMAIL SUCCESS:", info.response);
-})
-.catch(err => {
-  console.log("EMAIL FAILED:", err);
-});
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+
 
 //  2. Verify OTP and complete registration
 app.post('/verify-otp', async (req, res) => {
