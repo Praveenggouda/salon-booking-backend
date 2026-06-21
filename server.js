@@ -19,18 +19,13 @@ const razorpay = new Razorpay({
 const app = express();
 const PORT = 3000;
 
-// Setup Gmail transporter
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+  service: "gmail",
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASS
   }
 });
-
-
 
 // OTP Map
 const otpMap = new Map();
@@ -119,15 +114,18 @@ app.post('/register', async (req, res) => {
     res.json({ success: true, message: "OTP sent to email" });
 
     // send email AFTER response (non-blocking)
-    transporter.sendMail({
-      from: 'praveengouda31@gmail.com',
-      to: email,
-      subject: 'Your OTP for Salon Registration',
-      html: `<h3>Your OTP is: <b>${otp}</b></h3>`
-    })
-    .then(() => console.log("OTP sent"))
-    .catch(err => console.log("Email error:", err));
-
+transporter.sendMail({
+  from: process.env.GMAIL_USER,
+  to: email,
+  subject: 'Your OTP for Salon Registration',
+  html: `<h3>Your OTP is: <b>${otp}</b></h3>`
+})
+.then(info => {
+  console.log("EMAIL SUCCESS:", info.response);
+})
+.catch(err => {
+  console.log("EMAIL FAILED:", err);
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
