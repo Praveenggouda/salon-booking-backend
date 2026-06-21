@@ -28,8 +28,7 @@ const transporter = nodemailer.createTransport({
     pass: process.env.GMAIL_PASS
   }
 });
-// OTP Map
-const otpMap = new Map();
+
 
 // Middleware setup
 app.use(cors({
@@ -94,88 +93,44 @@ app.post('/register', async (req, res) => {
   const { name, email, password, phone, gender } = req.body;
 
   try {
+    // check user already exists
     const [rows] = await db.query(
       "SELECT * FROM users WHERE email = ? OR phone = ?",
       [email, phone]
     );
 
     if (rows.length > 0) {
-      return res.json({ success: false, message: "Email or phone already registered" });
-    }
-
-    const otp = Math.floor(100000 + Math.random() * 900000);
-
-    otpMap.set(email, {
-      otp,
-      data: { name, email, password, phone, gender },
-      expires: Date.now() + 5 * 60000
-    });
-
-    // ⚠️ Send email FIRST and wait for it
-    try {
-      const info = await transporter.sendMail({
-        from: process.env.GMAIL_USER,
-        to: email,
-        subject: 'Your OTP for GlowBook Registration',
-        html: `
-          <h2>Welcome to GlowBook! ✨</h2>
-          <p>Your OTP for registration is:</p>
-          <h1 style="color: #6C63FF; font-size: 32px;">${otp}</h1>
-          <p>This OTP is valid for <b>5 minutes</b>.</p>
-          <p>If you didn't request this, please ignore this email.</p>
-        `
-      });
-      
-      console.log("✅ Email sent:", info.response);
-      
-      // ✅ Now send success response
-      res.json({ success: true, message: "OTP sent to your email" });
-      
-    } catch (emailError) {
-      console.error("❌ Email failed:", emailError);
-      // ❌ Clean up the OTP since email failed
-      otpMap.delete(email);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to send OTP. Please check your email configuration." 
+      return res.json({
+        success: false,
+        message: "Email or phone already registered"
       });
     }
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-
-
-//  2. Verify OTP and complete registration
-app.post('/verify-otp', async (req, res) => {
-  const { name, email, password, phone, gender, otp } = req.body;
-  const stored = otpMap.get(email);
-
-  if (!stored || Date.now() > stored.expires) {
-    return res.json({ success: false, message: "OTP expired or not found" });
-  }
-
-  if (parseInt(otp) !== stored.otp) {
-    return res.json({ success: false, message: "Incorrect OTP" });
-  }
-
-  try {
+    // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // insert user directly
     await db.query(
       "INSERT INTO users (name, email, password, phone, gender) VALUES (?, ?, ?, ?, ?)",
       [name, email, hashedPassword, phone, gender]
     );
 
-    otpMap.delete(email);
-    res.json({ success: true, message: "Registration successful" });
+    res.json({
+      success: true,
+      message: "Registration successful"
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Database error" });
+    console.error("REGISTER ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 });
+
+
+
 
 
 // Login Route (with bcrypt)
